@@ -493,7 +493,6 @@ root@kind-control-plane:/etc/kubernetes/manifests# crictl ps
 CONTAINER           IMAGE               CREATED             STATE               NAME                      ATTEMPT             POD ID
 5ed459d15abae       c1fa37765208c       2 hours ago         Running             calico-node               26                  3367c6ba943e4
 c8b440487a420       c39074f0dc90a       2 hours ago         Running             calico-typha              12                  cce832ee1b1dc
-781202e26b1a2       2c4adeb21b4ff       2 hours ago         Running             etcdclient                0                   d0aaf1c2d1e74
 c243057a48413       1120bf0b8b414       20 hours ago        Running             calico-kube-controllers   0                   1b42e2cc45e6f
 d13f699a9d5fa       bfe3a36ebd252       20 hours ago        Running             coredns                   0                   fed3ff1d74ec1
 b05124159ab78       bfe3a36ebd252       20 hours ago        Running             coredns                   0                   0a721af9d88ce
@@ -501,3 +500,143 @@ c6edb27c85729       fe7245688ff6b       20 hours ago        Running             
 73721a2a3cb22       47e289e332426       21 hours ago        Running             kube-proxy                0                   fb89c2de09235
 root@kind-control-plane:/etc/kubernetes/manifests# 
 ```
+
+Now, try 
+
+```
+kubectl get pods
+```
+
+you should not see any output.. 
+
+Try to delete etcd member
+
+```
+rm -rf /var/lib/etcd/member
+```
+
+you have deleted etcd data ..
+
+```
+mv /tmp/* .
+ls
+
+```
+
+The static pod should have registered .. 
+
+```
+root@kind-control-plane:/etc/kubernetes/manifests# crictl ps
+CONTAINER           IMAGE               CREATED             STATE               NAME                      ATTEMPT             POD ID
+12d2c5988267c       2c4adeb21b4ff       27 seconds ago      Running             etcdclient                0                   3c78c7a117b11
+22d9dc1f2a0e6       8cba89a89aaa8       27 seconds ago      Running             kube-apiserver            0                   63aa5f1fdf14d
+23cae4e98f3ae       4d648fc900179       27 seconds ago      Running             kube-scheduler            0                   90a43ed2283ac
+9bcc9a2ac01dd       0369cf4303ffd       27 seconds ago      Running             etcd                      0                   e161fb8c9eba4
+e9d06457c5623       7dafbafe72c90       27 seconds ago      Running             kube-controller-manager   0                   d58266b1199da
+5ed459d15abae       c1fa37765208c       2 hours ago         Running             calico-node               26                  3367c6ba943e4
+c8b440487a420       c39074f0dc90a       2 hours ago         Running             calico-typha              12                  cce832ee1b1dc
+c243057a48413       1120bf0b8b414       20 hours ago        Running             calico-kube-controllers   0                   1b42e2cc45e6f
+d13f699a9d5fa       bfe3a36ebd252       20 hours ago        Running             coredns                   0                   fed3ff1d74ec1
+b05124159ab78       bfe3a36ebd252       20 hours ago        Running             coredns                   0                   0a721af9d88ce
+c6edb27c85729       fe7245688ff6b       20 hours ago        Running             tigera-operator           0                   24f20087a83ad
+73721a2a3cb22       47e289e332426       21 hours ago        Running             kube-proxy                0                   fb89c2de09235
+root@kind-control-plane:/etc/kubernetes/manifests# 
+```
+
+It is clean now
+
+```
+kubectl get pods
+```
+
+Now break again 
+
+```
+mv /etc/kubernetes/manifests/* /tmp/
+```
+The pods have been deleted and clean now. 
+
+```
+crictl ps
+```
+
+Now, move etcdclient back to the static pod place
+
+```
+mv /tmp/etcdclient.yaml /etc/kubernetes/manifests/
+crictl ps
+crictl exec -it <<>> sh  
+```
+
+copy the backup file
+
+```
+cp /var/lib/etcd/backup .
+/ # ls -ltr
+total 3452
+drwxr-xr-x    2 root     root         12288 Oct  1  2018 bin
+drwxrwxrwt    2 root     root          4096 Oct  1  2018 tmp
+drwxr-xr-x    2 nobody   nogroup       4096 Oct  1  2018 home
+drwxr-xr-x    1 root     root          4096 Nov 30  2018 usr
+dr-xr-xr-x   13 root     root             0 Nov  8 00:01 sys
+drwxr-xr-x    1 root     root          4096 Nov  8 23:05 var
+dr-xr-xr-x  233 root     root             0 Nov  8 23:05 proc
+drwxr-xr-x    1 root     root          4096 Nov  8 23:05 etc
+drwxr-xr-x    5 root     root           360 Nov  8 23:05 dev
+drwx------    1 root     root          4096 Nov  8 23:07 root
+-rw-r--r--    1 root     root       3493920 Nov  8 23:08 backup
+```
+Delete the etcd contents now
+```
+rm -rf /var/lib/etcd/member/
+```
+restore the backup 
+```
+/ # ls -ltr
+total 3456
+drwxr-xr-x    2 root     root         12288 Oct  1  2018 bin
+drwxrwxrwt    2 root     root          4096 Oct  1  2018 tmp
+drwxr-xr-x    2 nobody   nogroup       4096 Oct  1  2018 home
+drwxr-xr-x    1 root     root          4096 Nov 30  2018 usr
+dr-xr-xr-x   13 root     root             0 Nov  8 00:01 sys
+drwxr-xr-x    1 root     root          4096 Nov  8 23:05 var
+dr-xr-xr-x  233 root     root             0 Nov  8 23:05 proc
+drwxr-xr-x    1 root     root          4096 Nov  8 23:05 etc
+drwxr-xr-x    5 root     root           360 Nov  8 23:05 dev
+drwx------    1 root     root          4096 Nov  8 23:07 root
+-rw-r--r--    1 root     root       3493920 Nov  8 23:08 backup
+drwx------    3 root     root          4096 Nov  8 23:11 default.etcd
+/ # 
+```
+move the etcd
+
+```
+mv default.etcd/member/ /var/lib/etcd/
+ls -al /var/lib/etcd/member/
+total 16
+drwx------    4 root     root          4096 Nov  8 23:11 .
+drwx------    3 root     root          4096 Nov  8 23:12 ..
+drwx------    2 root     root          4096 Nov  8 23:11 snap
+drwx------    2 root     root          4096 Nov  8 23:11 wal
+```
+move the pods to manifests folder 
+
+```
+mv /tmp/* /etc/kubernetes/manifests/
+```
+
+Now, check the static pods. 
+
+```
+kubectl get pods
+```
+
+Try to scale the deployment to replicas to 2.
+
+
+
+```
+kubectl scale deploy test --replicas 2
+```
+
+

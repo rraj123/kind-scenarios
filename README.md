@@ -84,7 +84,7 @@ The control plane node should be running all the core components.
 ```
 root@kind-control-plane:/# crictl ps
 ```
-
+Each of the node has containerd running .. 
 ```
 
 
@@ -94,4 +94,36 @@ CONTAINER           IMAGE               CREATED             STATE               
 24bf8c4fde84f       8cba89a89aaa8       49 minutes ago      Running             kube-apiserver            0                   ad86b88dcc3eb
 1b65defdb3ad2       7dafbafe72c90       49 minutes ago      Running             kube-controller-manager   0                   02ddc94f5db77
 0a83860c5e59a       4d648fc900179       49 minutes ago      Running             kube-scheduler            0                   27f58107f2ddf
+```
+
+### Reset the kind cluster manually. [ kubeadm reset ]
+The intent is to clean out all the core components of the  control plane and worker nodes. Now, bash into the control plane and use kubeadm reset to wipe out all of the core components. 
+
+```
+docker exec -it kind-control-plane kubeadm reset -f
+docker exec -it kind-worker kubeadm reset -f
+docker exec -it kind-worker2 kubeadm reset -f
+docker exec -it kind-worker3 kubeadm reset -f
+
+```
+
+Now, kubectl will not work, because the previous command deleted all the core components. try that 
+
+```
+kubectl get nodes [or get pods]
+```
+
+Try bash into the control plane node and explore the pods. 
+```
+docker exec -it kind-control-plane  bash
+root@kind-control-plane:/# crictl ps
+CONTAINER           IMAGE               CREATED             STATE               NAME                ATTEMPT             POD ID
+```
+
+The crictl ps will not give you anything.. 
+
+```
+root@kind-control-plane:/# crictl ps
+CONTAINER           IMAGE               CREATED             STATE               NAME                ATTEMPT             POD ID
+root@kind-control-plane:/# 
 ```

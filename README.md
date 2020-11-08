@@ -323,10 +323,130 @@ Now, you should see the all the nodes.
 
 ### Understand static pods
 
+Run the following commands and understand what is going on here..
+```
+kubectl get pods -n kube-system
+kubectl get pods -n kube-system -o wide
+```
+First, Under the hood, the kubeadm runs the static pods to initalize the core components. 
+
+The static pod manifests are stored in 
+```
+cd /etc/kubernetes/manifests
+root@kind-control-plane:/etc/kubernetes/manifests# ls -ltr
+total 16
+-rw------- 1 root root 3692 Nov  8 02:05 kube-apiserver.yaml
+-rw------- 1 root root 3380 Nov  8 02:05 kube-controller-manager.yaml
+-rw------- 1 root root 1384 Nov  8 02:05 kube-scheduler.yaml
+-rw------- 1 root root 2115 Nov  8 02:05 etcd.yaml
+```
 
 
+The static pods are managed by the kubelet not by kubectl. 
+
+```
+root@kind-control-plane:/etc/kubernetes/manifests# crictl ps
+CONTAINER           IMAGE               CREATED             STATE               NAME                      ATTEMPT             POD ID
+c243057a48413       1120bf0b8b414       About an hour ago   Running             calico-kube-controllers   0                   1b42e2cc45e6f
+d13f699a9d5fa       bfe3a36ebd252       About an hour ago   Running             coredns                   0                   fed3ff1d74ec1
+b05124159ab78       bfe3a36ebd252       About an hour ago   Running             coredns                   0                   0a721af9d88ce
+df459e812730d       c1fa37765208c       About an hour ago   Running             calico-node               0                   3367c6ba943e4
+5da07d698efa1       c39074f0dc90a       About an hour ago   Running             calico-typha              0                   cce832ee1b1dc
+c6edb27c85729       fe7245688ff6b       About an hour ago   Running             tigera-operator           0                   24f20087a83ad
+73721a2a3cb22       47e289e332426       2 hours ago         Running             kube-proxy                0                   fb89c2de09235
+f2e6212be0069       0369cf4303ffd       2 hours ago         Running             etcd                      0                   cd0b0ee253952
+509a0c03ce946       7dafbafe72c90       2 hours ago         Running             kube-controller-manager   0                   2a66c7631f7f8
+13e8e5c471331       4d648fc900179       2 hours ago         Running             kube-scheduler            0                   6521ba3b1c11f
+bb9bfbaecff60       8cba89a89aaa8       2 hours ago         Running             kube-apiserver            0                   a2ec580761074
+
+```
+
+How do you demonstrate that these pods are owned by the kubelet... 
+```
+while true ; do time ; done
+```
+
+you can open another terminal and delete the etcd , it wont affect because it is static pods. 
+
+The other way is that you can completely rm the 
+
+How do you identify the static pods through naming convention?
+
+kubeadm init phase control-plane apiserver --config /kind/kubeadm.conf
+Now check 
+Run the following 
+crictl ps
+kubeadm help
+Go through the kubeadm init phase --help
+
+Kubeadm troubleshooting  or fix the things
+
+### ETCDCTL 
+
+```
+kubectl create deployment test --image=nginx
+
+kubectl scale deployment test --replicas=5
+
+kubectl get pods -o wide
+
+```
+
+```
+docker exec -it kind-control-plane bash
+cd /etc/kubernetes/manifests
+curl -LO git.io/etcdclient.yaml
+```
+Now, the etcd client pod should have come up.. 
 
 
+```
+crictl ps
+crictl exec -it <<>> sh
+which etcdctl
+etcdctl
+etcdctl endpoint status
+```
 
+find out where are the certs laid 
+find out cert details and etc. 
+```
+etcdctl snapshot save --help
+etcdctl snapshot save <filename>
+```
 
+you can take a look at the pod spec 
 
+```
+cat 
+/var/lib/etcd
+cat etcdclient.yaml 
+```
+
+```
+  volumeMounts:
+    - mountPath: /etc/kubernetes/pki/etcd
+      name: etcd-certs
+      readOnly: true
+    - mountPath: /var/lib/etcd
+      name: etcd-data
+      readOnly: false
+```
+copy the back from the pod to control plane node
+
+```
+cp backup /var/lib/etcd/backup
+exit
+```
+
+Now, you have snapshot is copied over to the control plane node.
+
+```
+export KUBECONFIG=/etc/kubernetes/admin.conf
+kubectl get pods
+```
+The pods must be running.. 
+
+Now try to break the cluster.
+
+### Break the cluster 

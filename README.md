@@ -449,4 +449,55 @@ The pods must be running..
 
 Now try to break the cluster.
 
-### Break the cluster 
+### Break the cluster (Yes..!)
+
+so far, you have used etcdclient static pod to snapshot of etcd data. Now, it is in your control plane node. 
+
+```
+docker exec -it kind-control-plane bash
+
+```
+
+
+Move all the static pods to /tmp/ directory . 
+
+```
+
+root@kind-control-plane:/etc/kubernetes/manifests# crictl ps
+CONTAINER           IMAGE               CREATED             STATE               NAME                      ATTEMPT             POD ID
+d11c35d7d500f       7dafbafe72c90       54 minutes ago      Running             kube-controller-manager   18                  2a66c7631f7f8
+3df122099b28e       4d648fc900179       2 hours ago         Running             kube-scheduler            17                  6521ba3b1c11f
+5ed459d15abae       c1fa37765208c       2 hours ago         Running             calico-node               26                  3367c6ba943e4
+c8b440487a420       c39074f0dc90a       2 hours ago         Running             calico-typha              12                  cce832ee1b1dc
+781202e26b1a2       2c4adeb21b4ff       2 hours ago         Running             etcdclient                0                   d0aaf1c2d1e74
+c243057a48413       1120bf0b8b414       20 hours ago        Running             calico-kube-controllers   0                   1b42e2cc45e6f
+d13f699a9d5fa       bfe3a36ebd252       20 hours ago        Running             coredns                   0                   fed3ff1d74ec1
+b05124159ab78       bfe3a36ebd252       20 hours ago        Running             coredns                   0                   0a721af9d88ce
+c6edb27c85729       fe7245688ff6b       20 hours ago        Running             tigera-operator           0                   24f20087a83ad
+73721a2a3cb22       47e289e332426       21 hours ago        Running             kube-proxy                0                   fb89c2de09235
+f2e6212be0069       0369cf4303ffd       21 hours ago        Running             etcd                      0                   cd0b0ee253952
+bb9bfbaecff60       8cba89a89aaa8       21 hours ago        Running             kube-apiserver            0                   a2ec580761074
+root@kind-control-plane:/etc/kubernetes/manifests# 
+```
+you have a functioning cluster ..
+
+Break ..
+
+```
+mv /etc/kubernetes/manifests/* /tmp/
+```
+Now, you should see
+
+```
+root@kind-control-plane:/etc/kubernetes/manifests# crictl ps
+CONTAINER           IMAGE               CREATED             STATE               NAME                      ATTEMPT             POD ID
+5ed459d15abae       c1fa37765208c       2 hours ago         Running             calico-node               26                  3367c6ba943e4
+c8b440487a420       c39074f0dc90a       2 hours ago         Running             calico-typha              12                  cce832ee1b1dc
+781202e26b1a2       2c4adeb21b4ff       2 hours ago         Running             etcdclient                0                   d0aaf1c2d1e74
+c243057a48413       1120bf0b8b414       20 hours ago        Running             calico-kube-controllers   0                   1b42e2cc45e6f
+d13f699a9d5fa       bfe3a36ebd252       20 hours ago        Running             coredns                   0                   fed3ff1d74ec1
+b05124159ab78       bfe3a36ebd252       20 hours ago        Running             coredns                   0                   0a721af9d88ce
+c6edb27c85729       fe7245688ff6b       20 hours ago        Running             tigera-operator           0                   24f20087a83ad
+73721a2a3cb22       47e289e332426       21 hours ago        Running             kube-proxy                0                   fb89c2de09235
+root@kind-control-plane:/etc/kubernetes/manifests# 
+```

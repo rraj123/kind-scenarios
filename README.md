@@ -7,7 +7,7 @@ The objective of this repo is to create a local kind cluster with kubeadm script
 ```
 curl -LO git.io/kind-mn-nocni.yaml
 ```
-The script looks like 
+The script looks like below and disabled the Default CNI
 
 ```
 kind: Cluster
@@ -19,4 +19,9 @@ nodes:
 - role: worker
 - role: worker
 - role: worker
+```
+
+The below is the command to create the cluster
+```
+kind create cluster --config kind-mn-noncni.yaml
 ```

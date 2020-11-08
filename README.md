@@ -25,6 +25,23 @@ The below is the command to create the cluster
 ```
 kind create cluster --config  kind-mn-nocni.yaml
 ```
+The o/p should look like 
+
+```
+Creating cluster "kind" ...
+ ✓ Ensuring node image (kindest/node:v1.19.1) 🖼 
+ ✓ Preparing nodes 📦 📦 📦 📦  
+ ✓ Writing configuration 📜 
+ ✓ Starting control-plane 🕹️ 
+ ✓ Installing StorageClass 💾 
+ ✓ Joining worker nodes 🚜 
+Set kubectl context to "kind-kind"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-kind
+
+Have a nice day! 👋
+```
 
 The following command will give you an output similar to 
 
@@ -45,3 +62,4 @@ kind-worker          NotReady   <none>   36m   v1.19.1
 kind-worker2         NotReady   <none>   36m   v1.19.1
 kind-worker3         NotReady   <none>   36m   v1.19.1
 ```
+

@@ -73,3 +73,22 @@ ec91a6967b68        kindest/node:v1.19.1   "/usr/local/bin/entr…"   44 minutes
 622218a08d63        kindest/node:v1.19.1   "/usr/local/bin/entr…"   44 minutes ago      Up 44 minutes                                   kind-worker
 e334f910be6a        registry:2             "/entrypoint.sh /etc…"   2 weeks ago         Up 4 days           0.0.0.0:5000->5000/tcp      registry
 ```
+
+Try to bash into one of the control plane node and explore .. 
+
+```
+docker exec -it kind-control-plane bash
+```
+The control plane node should be running all the core components. 
+
+```
+
+❯ 
+root@kind-control-plane:/# crictl ps
+CONTAINER           IMAGE               CREATED             STATE               NAME                      ATTEMPT             POD ID
+6b84037682223       47e289e332426       48 minutes ago      Running             kube-proxy                0                   00ba57efe8977
+84e5abb2920c7       0369cf4303ffd       49 minutes ago      Running             etcd                      0                   0fe7d4dcab653
+24bf8c4fde84f       8cba89a89aaa8       49 minutes ago      Running             kube-apiserver            0                   ad86b88dcc3eb
+1b65defdb3ad2       7dafbafe72c90       49 minutes ago      Running             kube-controller-manager   0                   02ddc94f5db77
+0a83860c5e59a       4d648fc900179       49 minutes ago      Running             kube-scheduler            0                   27f58107f2ddf
+```

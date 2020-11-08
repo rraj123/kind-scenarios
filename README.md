@@ -116,8 +116,6 @@ kubectl get nodes [or get pods]
 Try bash into the control plane node and explore the pods. 
 ```
 docker exec -it kind-control-plane  bash
-root@kind-control-plane:/# crictl ps
-CONTAINER           IMAGE               CREATED             STATE               NAME                ATTEMPT             POD ID
 ```
 
 The crictl ps will not give you anything.. 

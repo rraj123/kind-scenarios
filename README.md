@@ -321,7 +321,7 @@ kubectl get nodes
 Now, you should see the all the nodes. 
 
 
-
+### Understand static pods
 
 
 

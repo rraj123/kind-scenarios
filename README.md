@@ -155,7 +155,7 @@ apiServer:
     runtime-config: ""
 apiVersion: kubeadm.k8s.io/v1beta2
 clusterName: kind
-controlPlaneEndpoint: ** kind-control-plane:6443
+controlPlaneEndpoint: kind-control-plane:6443
 controllerManager:
   extraArgs:
     enable-hostpath-provisioner: "true"
@@ -168,3 +168,165 @@ scheduler:
   extraArgs: null
 
 ```
+Pay attention to the controlPlaneeEndpoint (uses docker dns for routing)
+Enable-host-path-provisioner: (The static pods uses this initialize, Try to connect the dots.. to run the staeful pods and etc)
+podSubnet
+serviceSubnet
+
+
+Go through the 
+k8s version
+Init configuration
+Join configuration
+kubelet conf
+kubeproxy configuration.
+
+### Configure using the kubeadm 
+bash into control plane container
+
+```
+docker exec -it kind-control-plane bash
+```
+
+? swap enabled --
+? privileged container
+
+```
+kubeadm init --config=/kind/kubeadm.conf --ignore-preflight-errors=all
+```
+Go through the kubeadm output ... 
+
+Try kubectl get nodes, nothing would work. 
+
+Set up KUBECONFIG 
+
+```
+export KUBECONFIG=/etc/kubernetes/admin.conf
+kubectl get nodes
+```
+
+Now, you have a control plane node that has all the kubernetes components installed. 
+
+The master status is set to NotReady, Because, it does not have any CNI installed. 
+
+The next step is to install the CNI. 
+
+### Install Calico (CNI)
+Inside the control plane container. 
+
+If you are not 
+```
+docker exec -it kind-control-plane bash
+curl -LO git.io/calico.sh
+cat calico.sh
+```
+Go through the calico.sh file
+
+Install the calico operator file
+```
+kubectl apply -f https://docs.projectcalico.org/manifests/tigera-operator.yaml
+```
+
+The above kubectl does not apply calico pod network. 
+
+```
+curl -LO https://docs.projectcalico.org/manifests/custom-resources.yaml
+
+cat custom-resources.yaml
+```
+you should see that CIDR range is very different from the kubeadm.conf file. 
+
+```
+grep -i pod /kind/kubeadm.conf
+```
+
+you should see different podsubnet 
+
+replace the cidr range in custom-resources  
+```
+sed -i s/192.168.0.0/10.244.0.0/ custom-resources.yaml
+```
+
+```
+kubectl apply -f custom-resources.yaml
+```
+
+To find out the status ..
+
+```
+kubectl get pods -Aw
+```
+
+After a couple of seconds, you should have one node cluster that has everything installed. 
+
+
+```
+kubectl get pods
+```
+Now check the node status
+
+```
+kubectl get nodes
+```
+you should see all status of the master node...
+
+### Make the worker node to join this node
+
+To get the kubeadm token from the master node, 
+
+Bash into the control plane node
+
+```
+kubeadm token create --print-join-command
+```
+
+Now get the kubeadm join command and add --ignore-preflight-errors=all
+
+It should look like something like this... 
+```
+kubeadm join kind-control-plane:6443 --token <bootstrap-token here>     --discovery-token-ca-cert-hash <<sha256:ca-cert-hash>>
+```
+
+bash into worker nodes and repeat the process
+```
+docker ps
+docker exec -it kind-worker bash
+kubeadm join kind-control-plane:6443 --token << >>     --discovery-token-ca-cert-hash sha256:<< >> --ignore-preflight-errors=all
+```
+
+If you have two sessions, bash into control plane and check the nodes
+
+```
+kubectl get nodes
+```
+If all went well, you should be seeing additional nodes in the cluster. 
+
+
+### Configure local kubectl 
+come out of the container shell. 
+
+Try
+```
+kubectl get nodes
+```
+
+This above step wont work.
+you need to export the config from the inside the kind cluster and update the kubectl locally to access the cluster. 
+
+```
+kind export kubeconfig
+kubectl get nodes
+
+```
+Now, you should see the all the nodes. 
+
+
+
+
+
+
+
+
+
+
+

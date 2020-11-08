@@ -125,3 +125,46 @@ root@kind-control-plane:/# crictl ps
 CONTAINER           IMAGE               CREATED             STATE               NAME                ATTEMPT             POD ID
 root@kind-control-plane:/# 
 ```
+
+Currently, we have four nodes with nothing. 
+
+```
+docker ps
+```
+will list all the four containers (nodes)
+
+Now, bash into the control plane node 
+
+```
+docker exec -it kind-control-plane  bash
+```
+kind has kubeadm configuration in the node itself. 
+
+```
+cat /kind/kubeadm.conf
+```
+Take a moment and explore all the section in the kubeadm configuration. 
+
+Here is the snippet of kubeadm configuration. 
+```
+apiServer:
+  certSANs:
+  - localhost
+  - 127.0.0.1
+  extraArgs:
+    runtime-config: ""
+apiVersion: kubeadm.k8s.io/v1beta2
+clusterName: kind
+controlPlaneEndpoint: ** kind-control-plane:6443
+controllerManager:
+  extraArgs:
+    enable-hostpath-provisioner: "true"
+kind: ClusterConfiguration
+kubernetesVersion: v1.19.1
+networking:
+  podSubnet: 10.244.0.0/16
+  serviceSubnet: 10.96.0.0/16
+scheduler:
+  extraArgs: null
+
+```

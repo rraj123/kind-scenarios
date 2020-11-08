@@ -181,7 +181,7 @@ Join configuration
 kubelet conf
 kubeproxy configuration.
 
-### Configure using the kubeadm 
+### Configure control plane node using kubeadm 
 bash into control plane container
 
 ```
@@ -270,7 +270,7 @@ kubectl get nodes
 ```
 you should see all status of the master node...
 
-### Make the worker node to join this node
+### Grow the cluster
 
 To get the kubeadm token from the master node, 
 

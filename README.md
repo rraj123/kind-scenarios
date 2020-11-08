@@ -82,9 +82,12 @@ docker exec -it kind-control-plane bash
 The control plane node should be running all the core components. 
 
 ```
-
-❯ 
 root@kind-control-plane:/# crictl ps
+```
+
+```
+
+
 CONTAINER           IMAGE               CREATED             STATE               NAME                      ATTEMPT             POD ID
 6b84037682223       47e289e332426       48 minutes ago      Running             kube-proxy                0                   00ba57efe8977
 84e5abb2920c7       0369cf4303ffd       49 minutes ago      Running             etcd                      0                   0fe7d4dcab653

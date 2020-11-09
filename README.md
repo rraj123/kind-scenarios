@@ -640,3 +640,187 @@ kubectl scale deploy test --replicas 2
 ```
 
 
+### Upgrade kubeadm 
+
+Links are 
+```
+cd 
+curl -LO https://dl.k8s.io/v1.19.2/bin/linux/amd64/kubeadm
+curl -LO https://dl.k8s.io/v1.19.2/bin/linux/amd64/kubelet
+
+cd 
+chmod +x k*
+```
+
+now, explore kubeadm explore plan
+
+```
+kubeadm --help
+kubeadm upgrade --help
+kubeadm upgrade plan
+```
+
+The upgrade plan command will give you 
+
+```
+COMPONENT                 CURRENT    AVAILABLE
+kube-apiserver            v1.19.1    v1.19.3
+kube-controller-manager   v1.19.1    v1.19.3
+kube-scheduler            v1.19.1    v1.19.3
+kube-proxy                v1.19.1    v1.19.3
+CoreDNS                   1.7.0      1.7.0
+etcd                      3.4.13-0   3.4.13-0
+```
+
+Now, Apply kubeadm upgrade apply v1.19.3
+
+
+```
+kubeadm upgrade apply v1.19.3
+```
+
+The output would like this 
+
+```
+root@kind-control-plane:/# kubeadm upgrade apply v1.19.3
+[upgrade/config] Making sure the configuration is correct:
+[upgrade/config] Reading configuration from the cluster...
+[upgrade/config] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[preflight] Running pre-flight checks.
+[upgrade] Running cluster health checks
+[upgrade/version] You have chosen to change the cluster version to "v1.19.3"
+[upgrade/versions] Cluster version: v1.19.1
+[upgrade/versions] kubeadm version: v1.19.1
+[upgrade/version] FATAL: the --version argument is invalid due to these errors:
+
+        - Specified version to upgrade to "v1.19.3" is higher than the kubeadm version "v1.19.1". Upgrade kubeadm first using the tool you used to install kubeadm
+
+Can be bypassed if you pass the --force flag
+To see the stack trace of this error execute with --v=5 or higher
+root@kind-control-plane:/# 
+
+```
+
+Take a moment and read through the output ..
+
+```
+kubeadm upgrade apply v1.19.3 --force
+```
+
+The output 
+
+```
+[upgrade/config] Making sure the configuration is correct:
+[upgrade/config] Reading configuration from the cluster...
+[upgrade/config] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[preflight] Running pre-flight checks.
+[upgrade] Running cluster health checks
+[upgrade/version] You have chosen to change the cluster version to "v1.19.3"
+[upgrade/versions] Cluster version: v1.19.1
+[upgrade/versions] kubeadm version: v1.19.1
+[upgrade/version] Found 1 potential version compatibility errors but skipping since the --force flag is set: 
+
+        - Specified version to upgrade to "v1.19.3" is higher than the kubeadm version "v1.19.1". Upgrade kubeadm first using the tool you used to install kubeadm
+[upgrade/prepull] Pulling images required for setting up a Kubernetes cluster
+[upgrade/prepull] This might take a minute or two, depending on the speed of your internet connection
+[upgrade/prepull] You can also perform this action in beforehand using 'kubeadm config images pull'
+[upgrade/apply] Upgrading your Static Pod-hosted control plane to version "v1.19.3"...
+Static pod: kube-apiserver-kind-control-plane hash: 31acd4150f7230e8323fdfb35067e3aa
+Static pod: kube-controller-manager-kind-control-plane hash: 411ac4af029477effdb68d633678044e
+Static pod: kube-scheduler-kind-control-plane hash: d8964234650b330c55fcf8fb2f5295dd
+[upgrade/etcd] Upgrading to TLS for etcd
+[upgrade/etcd] Non fatal issue encountered during upgrade: the desired etcd version "3.4.13-0" is not newer than the currently installed "3.4.13-0". Skipping etcd upgrade
+[upgrade/staticpods] Writing new Static Pod manifests to "/etc/kubernetes/tmp/kubeadm-upgraded-manifests082109356"
+[upgrade/staticpods] Preparing for "kube-apiserver" upgrade
+[upgrade/staticpods] Renewing apiserver certificate
+[upgrade/staticpods] Renewing apiserver-kubelet-client certificate
+[upgrade/staticpods] Renewing front-proxy-client certificate
+[upgrade/staticpods] Renewing apiserver-etcd-client certificate
+[upgrade/staticpods] Moved new manifest to "/etc/kubernetes/manifests/kube-apiserver.yaml" and backed up old manifest to "/etc/kubernetes/tmp/kubeadm-backup-manifests-2020-11-08-23-59-50/kube-apiserver.yaml"
+[upgrade/staticpods] Waiting for the kubelet to restart the component
+[upgrade/staticpods] This might take a minute or longer depending on the component/version gap (timeout 5m0s)
+Static pod: kube-apiserver-kind-control-plane hash: 31acd4150f7230e8323fdfb35067e3aa
+```
+
+Try this 
+```
+kubectl get nodes --kubeconfig /etc/kubernetes/admin.conf 
+```
+
+you may see different versions reported
+
+```
+root@kind-control-plane:/# kubectl get nodes --kubeconfig /etc/kubernetes/admin.conf 
+NAME                 STATUS   ROLES    AGE   VERSION
+kind-control-plane   Ready    master   21h   v1.19.1
+kind-worker          Ready    <none>   20h   v1.19.1
+kind-worker2         Ready    <none>   20h   v1.19.1
+kind-worker3         Ready    <none>   20h   v1.19.1
+```
+
+```
+kubectl version --kubeconfig /etc/kubernetes/admin.conf
+```
+```
+root@kind-control-plane:/# kubelet --version
+Kubernetes v1.19.1
+root@kind-control-plane:/# ./kubelet --version
+Kubernetes v1.19.2
+root@kind-control-plane:/# 
+```
+move the kubelet version and replace the new one
+
+```
+mv kubelet /usr/bin/kubelet
+systemctl restart kubelet
+```
+
+```
+root@kind-control-plane:/# kubectl get nodes --kubeconfig /etc/kubernetes/admin.conf
+
+NAME                 STATUS   ROLES    AGE   VERSION
+kind-control-plane   Ready    master   22h   v1.19.2
+kind-worker          Ready    <none>   21h   v1.19.1
+kind-worker2         Ready    <none>   20h   v1.19.1
+kind-worker3         Ready    <none>   20h   v1.19.1
+```
+
+Now, the version reported by the kubelet is ... 
+
+
+Now, you copy the kubelet to the local and repeat the steps for other worker nodes
+
+```
+docker cp kind-control-plane:/usr/bin/kubelet .
+```
+
+To copy to the worker node
+
+```
+docker cp kind-worker:/usr/bin/kubelet .
+docker cp kind-worker2:/usr/bin/kubelet .
+docker cp kind-worker3:/usr/bin/kubelet .
+```
+
+```
+kubectl get nodes
+```
+Now restart the kubelet to see the latest version
+
+```
+docker exec -it kind-worker systemctl restart kubelet
+docker exec -it kind-worker2 systemctl restart kubelet
+docker exec -it kind-worker3 systemctl restart kubelet
+```
+
+If the above step does not work, bash into the container and download the kubectl 
+replace and restart the service..
+
+### explain
+
+```
+kubectl explain pod.spec
+kubectl explain pod.spec --recursive
+kubectl explain pod.spec.initContainers
+kubectl api-resources
+```

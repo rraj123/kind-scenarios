@@ -775,4 +775,16 @@ helm status install-upgrade-rlbk-demo
 helm verify signchartdemo-0.1.0.tgz
 ```
 
+### docker chart
+
+```
+$ docker run --rm -it \
+  -p 8099:8080 \
+  -v $(pwd)/charts:/charts \
+  -e DEBUG=true \
+  -e STORAGE=local \
+  -e STORAGE_LOCAL_ROOTDIR=/charts \
+  chartmuseum/chartmuseum:latest
+```
+
 ## YAML

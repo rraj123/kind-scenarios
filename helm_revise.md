@@ -403,4 +403,189 @@ To access values outside of with block, then variables can be used to access the
   app.kubernetes.io/managed-by: "{{ $.Release.Service }}"
 ```
 
-#### Variable 
+#### Names templates
+
+kubernetes templates in templates/ 
+except Notes.txt
+
+starting with _may not have manifest
+
+```
+ {{- define "mychart.systemlables" }}
+   labels:
+     drive: ssd
+     machine: frontdrive
+     rack: 4c
+     vcard: 8g
+ {{- end }}
+ 
+ 
+ {{- template "mychart.systemlables" }}
+ 
+ helm install --dry-run --debug templatedemo ./mychart
+ 
+```
+
+Here are the important pointers.. 
+
+1. you can include the template from the same file (Not recommended)
+2. create a file name that starts with _<<filename>>.tpl
+3. you can include the contents through 
+    a. template
+    b. include 
+
+template option maintain the intendations
+include option maintain does not 
+
+How do you pass the objects to the template '$' or '.'. 
+
+
+```
+ metadata:
+   name: {{ .Release.Name}}-configmap
+   labels:
+ {{ template "mychart.version" . | indent 4 }}
+ {{ include "mychart.version" . | indent 4 }}
+ data:
+   myvalue: "Sample Config Map"
+   costCode: {{ .Values.costCode }}
+   Zone: {{ quote .Values.infra.zone }}
+   Region: {{ quote .Values.infra.region }}
+   ProjectCode: {{ upper .Values.projectCode }}
+   pipeline: {{ .Values.projectCode | upper | quote }}
+   now: {{ now | date "2006-01-02"| quote }}
+   contact: {{ .Values.contact | default "1-800-123-0000" | quote }}
+   {{- range $key, $value := .Values.tags }}
+   {{ $key }}: {{ $value | quote }}
+   {{- end }}
+{{include "mychart.version" $ | indent 2 }}
+```
+
+
+```
+  
+   ~~~~~~~~~~~~~~~~~~
+   
+   _helpers.tpl
+   
+   
+   {{- define "mychart.systemlables" }}
+     labels:
+       drive: ssd
+       machine: frontdrive
+       rack: 4c
+       vcard: 8g
+   {{- end }}
+   
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
+   
+   app.kubernetes.io/instance: "{{ $.Release.Name }}"
+   app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+   app.kubernetes.io/managed-by: "{{ $.Release.Service }}"
+   
+   
+   {{- template "mychart.systemlables" . }}
+   
+   {{- template "mychart.systemlables" $ }}
+   
+helm install --dry-run --debug templatedemo ./mychart
+```
+
+#### Notes
+
+```
+ templates/NOTES.txt
+ 
+ Thank you for support {{ .Chart.Name }}.
+ 
+ Your release is named {{ .Release.Name }}.
+ 
+ To learn more about the release, try:
+ 
+   $ helm status {{ .Release.Name }}
+   $ helm get all {{ .Release.Name }}
+   $ helm uninstall {{ .Release.Name }}
+ 
+ 
+ ~~~~~~~~~~~~~~~~~
+ 
+helm install notesdemo ./mychart
+```
+
+#### Subcharts
+
+Subchart is similar to charts repository. The subcharts are buried within the charts directory. 
+
+
+cd to charts
+
+```
+cd mychart/charts
+ 
+ helm create mysubchart
+ 
+ rm -rf mysubchart/templates/*.*
+ 
+ ~~~~~~~~~~~~
+ 
+ mychart/charts/mysubchart/values.yaml
+ 
+ dbhostname: mysqlnode
+ 
+ ~~~~~~~~~~
+ 
+ mychart/charts/mysubchart/templates/configmap.yaml
+ 
+ apiVersion: v1
+ kind: ConfigMap
+ metadata:
+   name: {{ .Release.Name }}-innerconfig
+ data:
+   dbhost: {{ .Values.dbhostname }}
+   
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+ 
+Here you are dry-running only the subcharts ... not the whole charts.
+
+ helm install --dry-run --debug mysubchart mychart/charts/mysubchart
+ 
+ ~~~~~~~~~~~~~~~~~~~~~
+ 
+
+ Overriding values from parent
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+ mychart/values.yaml
+ 
+ mysubchart:
+   dbhostname: prodmyqlnode
+ 
+overriding from the main driver...
+
+ helm install --dry-run --debug subchartoverride mychart
+```
+
+
+#### Overriding the values..
+
+global is the keyword 
+
+```
+ mychart/values.yaml
+ 
+ global:
+   orgdomain: com.muthu4all
+ 
+ 
+ mychart/charts/mysubchart/templates/configmap.yaml
+ and
+ mychart/templates/configmap.yaml
+ 
+ 
+ orgdomain: {{ .Values.global.orgdomain }}
+ 
+ helm install --dry-run --debug subchartoverride mychart
+ ```
+
+ 

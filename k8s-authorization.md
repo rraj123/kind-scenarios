@@ -38,3 +38,36 @@ Every change requires Kube API server to be restarted. (This would be difficult 
 
 #### Role based Access System
 
+User / Group assigned to a role. 
+
+Changes can be maintained through modifying the role configuration. 
+
+<br> 
+
+#### Webhook
+
+<br>
+
+Authz done externally through OPA. 
+Through AdmissionController Authorization APIs.
+Kube API server makes a call to OPA and OPA would make decision on whether this user is allowed to access. 
+
+#### Other mode (AlwaysAllow / AlwaysDeny)
+
+These options are set in kube-apiserver 
+
+```
+ExecStart=/usr/local/bin/kube-apiserver \\
+  --advertise-address=${INTERNAL_IP} \\
+  --allow-privileged=true \\
+  --apiserver-count=3 \\
+  --authorization-mode=Node,RBAC,Webhook \\
+  ...
+  ...
+```
+
+When you have a multiple auth configured... The control goes from one at a time.. 
+
+<br>
+
+

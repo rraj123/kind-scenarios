@@ -77,3 +77,89 @@ ClusterRole, ClusterRoleBindings are not namespaced.
 The question that you need to ask ... when do you use Role, RoleBindings and ClusterRole, ClusterRoleBindings ?
 
 
+#### Verbs for K8s Roles
+
+Create, delete, get, list, patch, update, watch, proxy
+
+#### Using Built-in Roles
+
+```
+kubectl get clusterroles
+```
+The cluster-admin role provides complete access to the entire cluster.
+
+The admin role provides complete access to a complete namespace.
+
+The edit role allows an end user to modify things in a namespace.
+
+The view role allows for read-only access to a namespace.
+
+#### AUTO-RECONCILIATION OF BUILT-IN ROLES
+
+The roles gets reset whenever K8s API server boots up, so to prevent from happenging, rbac.authorization.kubernetes.io/autoupdate annotation with a value of false to the built-in ClusterRole resource. 
+
+<br>
+
+By default, the Kubernetes API server installs a cluster role that allows system:unauthenticated users access to the API server’s API discovery endpoint. 
+
+```
+--anonymous-auth=false flag is set on your API server.
+```
+
+### Techniques for Managing RBAC
+
+#### Testing Authorization with can-i
+
+```
+kubectl auth can-i create pods
+kubectl auth can-i get pods --subresource=logs
+```
+
+#### Managing RBAC in Source Control
+
+```
+kubectl auth reconcile -f some-rbac-config.yaml
+
+To print
+kubectl auth reconcile -f some-rbac-config.yaml --dry-run
+```
+
+### Advanced Topics
+
+#### Aggegating roles
+
+aggregation rule to combine multiple roles together in a new role..
+
+
+A best practice for managing ClusterRole resources is to create a number of fine-grained cluster roles and then aggregate them together to form higher-level or broadly defined cluster roles. 
+
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: edit
+  ...
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.k8s.io/aggregate-to-edit: "true"
+...
+
+```
+ClusterRole objects that have a label of rbac.authorization.k8s.io/aggregate-to-edit set to true.
+
+#### Using Groups for Bindings
+best practice to use groups to manage the roles
+
+bind a group to a ClusterRole or a namespace Role, anyone who is a member of that group gains access to the resources and verbs defined by that role. 
+
+To bind a group to a ClusterRole you use a Group kind for the subject in the binding:
+
+```
+...
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: my-great-groups-name
+...
+```

@@ -31,7 +31,7 @@ Kube API has special authorizer caller "Node authorizer"
 
 ### ABAC
 
-User / Group can be associated to <b>a set of permission</b>. 
+User / Group can be associated to <b><u>a set of permission</</u></b>. 
 Create a policy permission file and apply.
 
 Every change requires Kube API server to be restarted. (This would be difficult to manage). 

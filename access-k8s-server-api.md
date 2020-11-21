@@ -39,6 +39,19 @@ users:
     client-key-data: <data>
 
 ```
+<br>
+
+Remember: There are two ways you can access the kuberntes APIs. 
+
+1. Start the kubectl proxy
+
+```
+kubectl proxy
+```
+
+2. Through curl command to k8s api server. To access the apis you need to get the certificates from kubeconfig file and pass them through as shown below.
+
+kubctl proxy and kubeproxy are not the same
 ```
 export client=$(grep client-cert ~/.kube/config |cut -d" " -f 6)
  export key=$(grep client-key-data ~/.kube/config |cut -d " " -f 6)
@@ -150,7 +163,9 @@ curl https://127.0.0.1:65384/apis --cert ./client.pem  --key ./client-key.pem --
 
 curl https://127.0.0.1:65384/apis --cert ./client.pem  --key ./client-key.pem --cacert ./ca.pem | jq  '.groups[] .name' | pbcopy
 ```
+
 <br>
+
 ```
 "apiregistration.k8s.io"
 "extensions"
@@ -173,4 +188,25 @@ curl https://127.0.0.1:65384/apis --cert ./client.pem  --key ./client-key.pem --
 "discovery.k8s.io"
 
 ```
+
+<br>
+
+
+you can go into /apis/apps/v1
+
+In future, most of the developments are going to be here.
+```
+curl https://127.0.0.1:65384/apis/apps/v1 --cert ./client.pem  --key ./client-key.pem --cacert ./ca.pem | jq 
+```
+link
+
+
+[k8 apis/apps/v1 list!](k8s-apis-apps-v1.md)  
+
+
+Arrange things like API Groups , Resources
+
+Refer kubernetes APIs groups (document for more information)
+
+
 

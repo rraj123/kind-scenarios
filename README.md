@@ -4,7 +4,7 @@ Introduction:
 
 The objective of this repo is to create a local kind cluster with kubeadm script. Thanks to mauilion
 
-(This is Surya)
+
 ## Install kind cluster locally
 
 ```

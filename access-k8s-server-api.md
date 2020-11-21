@@ -61,6 +61,6 @@ The output will look like this
 
 Move this to a file 
 
-[k8 apis list!] k8s-apis.md   
+[k8 apis list!](k8s-apis.md)   
 
 [link to Google!](http://google.com)

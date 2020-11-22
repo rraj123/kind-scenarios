@@ -1,7 +1,7 @@
-## K8 Security Basics 
+# K8 Security Basics 
 <br>
 
-### Introduction
+## Introduction
 
 <br>
 
@@ -20,11 +20,11 @@ Authorization is a combination of the identity of the user, the resource (effect
 
 User --> Resource (which resource?) --> Actions? (what kind of actions?)
 
-### Role based access control
+## Role based access control
 
 Keywords: <mark> role, role bindings </mark>
 
-#### Identity in the K8s.
+### Identity in the K8s.
 
 Keywords: <mark> service account identity, user identity </mark>
 
@@ -43,7 +43,7 @@ Supported Auth providers <br>
 + Authentication webhooks
 
 
-#### Role / Rolebindings
+### Role / Rolebindings
 
 <br>
 
@@ -53,7 +53,7 @@ Rolebinding is assignment of role to an identities.
 
 <br>
 
-#### Apply Role / Rolebinding 
+### Apply Role / Rolebinding 
 
 <br>
 Understand what resource are namespaces and what are not namespaced. 
@@ -77,11 +77,11 @@ ClusterRole, ClusterRoleBindings are not namespaced.
 The question that you need to ask ... when do you use Role, RoleBindings and ClusterRole, ClusterRoleBindings ?
 
 
-#### Verbs for K8s Roles
+### Verbs for K8s Roles
 
 Create, delete, get, list, patch, update, watch, proxy
 
-#### Using Built-in Roles
+### Using Built-in Roles
 
 ```
 kubectl get clusterroles
@@ -94,7 +94,7 @@ The edit role allows an end user to modify things in a namespace.
 
 The view role allows for read-only access to a namespace.
 
-#### AUTO-RECONCILIATION OF BUILT-IN ROLES
+### AUTO-RECONCILIATION OF BUILT-IN ROLES
 
 The roles gets reset whenever K8s API server boots up, so to prevent from happenging, rbac.authorization.kubernetes.io/autoupdate annotation with a value of false to the built-in ClusterRole resource. 
 
@@ -108,14 +108,14 @@ By default, the Kubernetes API server installs a cluster role that allows system
 
 ### Techniques for Managing RBAC
 
-#### Testing Authorization with can-i
+### Testing Authorization with can-i
 
 ```
 kubectl auth can-i create pods
 kubectl auth can-i get pods --subresource=logs
 ```
 
-#### Managing RBAC in Source Control
+### Managing RBAC in Source Control
 
 ```
 kubectl auth reconcile -f some-rbac-config.yaml
@@ -124,9 +124,9 @@ To print
 kubectl auth reconcile -f some-rbac-config.yaml --dry-run
 ```
 
-### Advanced Topics
+## Advanced Topics
 
-#### Aggegating roles
+### Aggegating roles
 
 aggregation rule to combine multiple roles together in a new role..
 
@@ -148,7 +148,7 @@ aggregationRule:
 ```
 ClusterRole objects that have a label of rbac.authorization.k8s.io/aggregate-to-edit set to true.
 
-#### Using Groups for Bindings
+### Using Groups for Bindings
 best practice to use groups to manage the roles
 
 bind a group to a ClusterRole or a namespace Role, anyone who is a member of that group gains access to the resources and verbs defined by that role. 
@@ -162,4 +162,125 @@ subjects:
   kind: Group
   name: my-great-groups-name
 ...
+```
+
+
+## Private Registry (Image Security)
+
+```
+kubectl create secret docker-registry regcred \
+    --docker-server= <private-registry.io>  \
+    --docker-username=registry-user \
+    --docker-password=registry-password \
+    --docker-email=registry@private.com
+```
+
+Here in the pod spec pass imagePullSecrets
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+spec:
+  containers:
+    - name: 
+      image:
+   imagePullSecrets:
+    - name: regcred
+```
+
+Example: 
+
+```
+kubectl create secret docker-registry private-reg-cred --docker-username=dock_user --docker-password=dock_password --docker-server=myprivateregistry.com:5000 --docker-email=dock_user@myprivateregistry.com
+```
+
+## Security Contexts
+
+'Id' of the user to run to the container
+
+Linux capability
+
+```
+docker run --user=1001 ubuntu sleep 1000
+```
+
+Security at container level or pod level
+
+look at the securityContext 
+
+securityContext @ Pod level
+
+```
+apiVerion: v1
+kind: Pod
+meta-data:
+  name: web-pod
+spec:
+  securityContext:
+    runAsUser: 1000
+  containers:
+    - name: ubuntu
+      image: ubuntu
+      command: ["sleep","3600"]  
+```
+
+securityContext @ container level
+
+```
+apiVerion: v1
+kind: Pod
+meta-data:
+  name: web-pod
+spec:
+  containers:
+    - name: ubuntu
+      image: ubuntu
+      command: ["sleep","3600"]
+```
+
+Try
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu-sleeper
+  namespace: default
+spec:
+  containers:
+  - command:
+    - sleep
+    - "4800"
+    image: ubuntu
+    name: ubuntu-sleeper
+    securityContext:
+      capabilities:
+        add: ["SYS_TIME"]
+```
+
+
+### Network policy
+
+How do you restrict the network inbounds from certain pods?
+
+```
+apiVersion:
+kind:
+metadata:
+spec:
+  podSelector:
+    matchLables:
+      role: db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            name: api-pod
+      ports:
+        - protocol: TCP
+          port: 3340
 ```

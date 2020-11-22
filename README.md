@@ -266,6 +266,24 @@ After a couple of seconds, you should have one node cluster that has everything 
 ```
 kubectl get pods
 ```
+
+you should see the pod output as below
+
+```
+NAMESPACE         NAME                                         READY   STATUS    RESTARTS   AGE
+calico-system     calico-kube-controllers-85ff5cb957-qdd7q     1/1     Running   0          119s
+calico-system     calico-node-p6p7b                            1/1     Running   0          119s
+calico-system     calico-typha-5cf84464b8-ddkfn                1/1     Running   0          2m
+kube-system       coredns-f9fd979d6-d9sjp                      1/1     Running   0          6m58s
+kube-system       coredns-f9fd979d6-zbmt9                      1/1     Running   0          6m58s
+kube-system       etcd-kind-control-plane                      1/1     Running   0          7m8s
+kube-system       kube-apiserver-kind-control-plane            1/1     Running   0          7m8s
+kube-system       kube-controller-manager-kind-control-plane   1/1     Running   0          7m8s
+kube-system       kube-proxy-nd8zf                             1/1     Running   0          6m58s
+kube-system       kube-scheduler-kind-control-plane            1/1     Running   0          7m8s
+tigera-operator   tigera-operator-5f668549f4-kjg7j             1/1     Running   0          2m49s
+```
+
 Now check the node status
 
 ```

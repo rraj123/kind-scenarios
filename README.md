@@ -267,7 +267,7 @@ After a couple of seconds, you should have one node cluster that has everything 
 kubectl get pods
 ```
 
-you should see the pod output as below
+you should see similar pod output as below
 
 ```
 NAMESPACE         NAME                                         READY   STATUS    RESTARTS   AGE
@@ -313,6 +313,27 @@ bash into worker nodes and repeat the process
 docker ps
 docker exec -it kind-worker bash
 kubeadm join kind-control-plane:6443 --token << >>     --discovery-token-ca-cert-hash sha256:<< >> --ignore-preflight-errors=all
+```
+
+you should see output like this 
+
+```
+rs=all
+[preflight] Running pre-flight checks
+	[WARNING Swap]: running with swap on is not supported. Please disable swap
+[preflight] Reading configuration from the cluster...
+[preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+W1122 19:41:47.791391    1019 kubelet.go:200] cannot automatically set CgroupDriver when starting the Kubelet: cannot execute 'docker info -f {{.CgroupDriver}}': executable file not found in $PATH
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Starting the kubelet
+[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...
+
+This node has joined the cluster:
+* Certificate signing request was sent to apiserver and a response was received.
+* The Kubelet was informed of the new secure connection details.
+
+Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 ```
 
 If you have two sessions, bash into control plane and check the nodes

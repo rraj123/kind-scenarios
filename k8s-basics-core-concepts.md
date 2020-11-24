@@ -339,7 +339,7 @@ kubectl create deployment webapp --image=kodekloud/webapp-color
 kubectl scale deployment/webapp --replicas=3
 ```
 
-Run a pod and expose port.. 
+<b><u>Run a pod and expose port.. </b></u>
 ```
 kubectl run custom-nginx --image=nginx --port=8080
 ```

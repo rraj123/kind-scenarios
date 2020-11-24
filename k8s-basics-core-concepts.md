@@ -184,3 +184,185 @@ Both the above commands have their own challenges. While one of it cannot accept
 
 
 [Reference:] (https://kubernetes.io/docs/reference/kubectl/conventions/)
+
+### Lessons from the practice test..
+
+##### Pod
+
+```
+kubectl run redis --image=redis
+kubectl run nginx --image-nginx
+kubectl edit pod nginx
+kubectl describe
+kubectl get pods -o wide
+```
+
+##### Replicasets
+
+```
+apiVersion: v1
+kind: ReplicaSet
+metadata:
+  name: replicaset-1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+```
+
+***Important***
+To understand the kind and app version , The below command is very useful.
+
+```
+kubectl explain replicaset
+kubectl explain replicaset | grep VERSION 
+
+you can navigate to different section ... 
+
+kubectl explain replicaset.spec.selector
+
+```
+
+What is the problem?
+```
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: replicaset-2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        tier: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+```
+
+error:
+```
+The ReplicaSet "replicaset-2" is invalid: spec.template.metadata.labels: Invalid value: map[string]string{"tier":"nginx"}: `selector` does not match template `labels`
+```
+
+#### Deployments
+
+```
+apiVersion: apps/v1
+kind: deployment
+metadata:
+  name: deployment-1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: busybox-pod
+  template:
+    metadata:
+      labels:
+        name: busybox-pod
+    spec:
+      containers:
+      - name: busybox-container
+        image: busybox888
+        command:
+        - sh
+        - "-c"
+        - echo Hello Kubernetes! && sleep 3600
+```
+
+```
+kubectl create deployment --image=nginx nginx --dry-run=client -o yaml > nginx-deploy.yaml
+```
+
+
+#### Namespace
+
+
+```
+kubectl run redis --image=redis -n finance
+```
+
+#### Services
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+spec:
+  type: NodePort
+  ports:
+    - targetPort: 8080
+      port: 8080
+      nodePort: 30080 
+  selector:
+    name: simple-webapp
+```
+
+#### Imperative commands
+
+Understand `kubectl apply -f`
+
+```
+kubectl run nginx-pod --image=nginx:alpine
+```
+
+Create pod w/ service..
+
+```
+kubectl run redis --image=redis:alpine -l tier=db
+```
+
+To create service 
+
+```
+kubectl expose pod redis --port=6379 --name redis-service
+```
+
+```
+kubectl create deployment --image=kodekloud/webapp-color webapp --dry-run=client -o yaml > deploy.yaml
+kubectl create deployment webapp --image=kodekloud/webapp-color
+kubectl scale deployment/webapp --replicas=3
+```
+
+Run a pod and expose port.. 
+```
+kubectl run custom-nginx --image=nginx --port=8080
+```
+
+Create a namespace
+```
+kubectl create ns dev-ns
+```
+
+Create a new deployment called redis-deploy in the dev-ns namespace with the redis image. It should have 2 replicas.
+
+```
+kubectl create deployment --image=redis redis-deploy --namespace=dev-ns --dry-run=client -o yaml > deploy.yaml
+```
+
+Create a pod called httpd using the image httpd:alpine in the default namespace. Next, create a service of type ClusterIP by the same name (httpd). The target port for the service should be 80.
+
+Try to do this with as few steps as possible.
+
+```
+kubectl run httpd --image=httpd:alpine
+kubectl expose pod httpd --port=80 --name httpd
+```
+**Or** 
+
+`kubectl run httpd --image=httpd:alpine --port=80 --expose`

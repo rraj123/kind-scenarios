@@ -193,3 +193,4 @@ spec:
     command: ['sh', '-c', 'until nslookup mydb; do echo waiting for mydb; sleep 2; done;']
 ```
 
+busybox image and sleeps for 20 seconds

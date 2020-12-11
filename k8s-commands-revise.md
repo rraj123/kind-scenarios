@@ -14,7 +14,7 @@ kubectl get nodes -o json
 
 
 
-To expose a pod 
+To expose a pod (service)
 ```
 kubectl expose pod messaging --name messaging-service --port 6379 --target-port 6379 --dry-run=client -o yaml > ser-test-1.yaml
 ```
@@ -61,3 +61,36 @@ Look at the config.yaml
 
 ````
 
+
+To create pod with namespace 
+```
+kubectl run temp-bus --image=redis:alpine --namespace=finance --dry-run=client -o yaml > red-fin-test-1.yaml
+```
+
+expose hr-web-app as service hr-web-app-service app 30082
+
+```
+kubectl expose deployment hr-web-app --name hr-web-app-service --type=NodePort --port 8080 --target-port 8080 --nodePort 30082 --dry-run=client -o yaml > hr-web-app-service-test1.yaml
+```
+
+***Tip*** <br>
+The important point is that you have to add nodePort:
+so revise with  <br>
+`kubectl explain svc.spec.ports`
+
+```
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 30080
+  selector:
+    app: hr-web-app
+```
+
+To validate 
+
+```
+kubectl describe svc <>
+kubectl explain pv --recursive | less
+```

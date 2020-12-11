@@ -223,6 +223,7 @@ spec:
 To understand the kind and app version , The below command is very useful.
 
 ```
+
 kubectl explain replicaset
 kubectl explain replicaset | grep VERSION 
 

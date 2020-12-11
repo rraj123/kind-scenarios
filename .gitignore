@@ -1,3 +1,4 @@
 *.pem
 Kubernetes-api.mindnode
 .DS_Store
+kubernetes-in-action-2nd-edition

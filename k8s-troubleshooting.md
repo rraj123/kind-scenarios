@@ -86,3 +86,4 @@ If you compare this with the label set on the coredns deployment and its pods, y
 Modify the kube-dns service and update the selector to k8s-app=kube-dns
 (Easist way is to use the kubectl edit command)
 ```
+xr-x  4 root root 

@@ -26,3 +26,9 @@ Separate deployment (add on)
 
 
 `kubectl logs -f pod-name container-name`
+
+```
+https://github.com/kodekloudhub/kubernetes-metrics-server.git
+
+kubectl top node
+```

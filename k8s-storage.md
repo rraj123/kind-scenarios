@@ -239,3 +239,209 @@ metadata:
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
 ```
+
+
+#### <u>Notes - Excercise</u>
+
+there is no -it switch for the kubectl exec 
+
+
+Note on volume:
+
+Under the Volume 
++ Volume Name (Good practice is that name it with `name-volume`)
++ Type and actual host path goes in here .. 
+`mountPath: /actual/path/over-here/`
+
+Under the container section <br>
+```
+containers:
+- mountPath: /log
+  name: log-volume  
+
+```
+
+How to delete a portion of the content vi
+
+```
+kubectl exec  webapp -- cat /log/app.log
+```
+
+```
+    volumeMounts:
+    - mountPath: /var/log/webapp
+      name: log-volume
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-2jnpg
+      readOnly: true
+
+  volumes:
+  - name: default-token-2jnpg
+    secret:
+      defaultMode: 420
+      secretName: default-token-2jnpg
+  - name: log
+    hostPath:
+      path: /var/log/webapp
+```
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webapp
+spec:
+  containers:
+  - name: event-simulator
+    image: kodekloud/event-simulator
+    env:
+    - name: LOG_HANDLERS
+      value: file
+    volumeMounts:
+    - mountPath: /log
+      name: log-volume
+
+  volumes:
+  - name: log-volume
+    hostPath:
+      # directory location on host
+      path: /var/log/webapp
+      # this field is optional
+      type: Directory
+```
+
+Create PV 
+
+```
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-log 
+spec:
+  capacity:
+    storage: 100Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /pv/log
+```
+
+```
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-log
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 100Mi
+  hostPath:
+    path: /pv/log
+```
+
+pod with pvc 
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    volumeMounts:
+      - name: local-persistent-storage
+        mountPath: /var/www/html
+  volumes:
+    - name: local-persistent-storage
+      persistentVolumeClaim:
+        claimName: local-pvc
+```
+
+??? create pod with volume 
+
+`kubectl run nginx --image=nginx:alpine --dry-run=client -o yaml`
+
+pod with pvc
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    name: nginx
+    resources: {}
+    volumeMounts:
+    - name: local-pvc
+      mountPath: "/var/www/html"
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+  - name: local-persistent-storage
+    persistentVolumeClaim:
+      claimName: local-pvc
+```
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx:alpine
+    name: nginx
+    resources: {}
+    volumeMounts:
+    - name: local-persistent-storage
+      mountPath: /var/www/html
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+  - name: local-persistent-storage
+    persistentVolumeClaim:
+      claimName: local-pvc
+```
+works
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    volumeMounts:
+      - name: local-persistent-storage
+        mountPath: /var/www/html
+  volumes:
+    - name: local-persistent-storage
+      persistentVolumeClaim:
+        claimName: local-pvc
+```
+
+Storage Class
+```
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: delayed-volume-sc
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+```
+

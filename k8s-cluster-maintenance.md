@@ -32,11 +32,18 @@ kubectl uncordon node01
 
 if ther are any loose pods with the nodes, then you cannot drain the node. you need to use `--force` switch. 
 
-***The loose pods will be deleted forever*** 
+**** Tip <br>
+If there are any pods that are not part of replicasets, the you have to use `--force` switch. 
+
+
+***<u>The loose pods will be deleted forever</u>*** 
 
 <u>To make it not schedulable</u> : 
 `kubectl cordon node03`
 
+```
+kubectl drain node02 --ignore-daemonsets --force
+```
 
 Releases
 ```
@@ -85,6 +92,26 @@ kubelet runs on all the nodes..
 `kubectl get nodes`
 
 #### Upgrade
+
+```
+
+
+apt update, apt install kubeadm=1.19.0-00 
+and then 
+kubeadm upgrade apply v1.19.0 
+and then 
+apt install kubelet=1.19.0-00
+
+kubectl uncordon master
+----
+Now for the node
+
+apt update 
+apt install kubeadm=1.19.0-00 
+and then kubeadm upgrade node. Finally, run apt install kubelet=1.19.0-00
+
+```
+
 
 Here is the sequence
 ```

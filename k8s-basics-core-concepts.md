@@ -174,6 +174,19 @@ kubectl expose pod nginx --port=80 --name nginx-service --type=NodePort --dry-ru
 
 (This will automatically use the pod's labels as selectors, but you cannot specify the node port. You have to generate a definition file and then add the node port in manually before creating the service with the pod.)
 
+Another update 
+```
+kubectl expose deploy simple-webapp-deployment --port=8080 --name webapp-service --type=NodePort --dry-run=client -o yaml > simple-web-servie.yaml
+```
+
+The key is that this does not add the nodePort in the service definition 
+
+Another one for pod
+
+```
+kubectl expose pod redis --name=redis-service --port=6379 --dry-run=client -o yaml
+```
+
 Or
 
 kubectl create service nodeport nginx --tcp=80:80 --node-port=30080 --dry-run=client -o yaml
@@ -182,6 +195,18 @@ kubectl create service nodeport nginx --tcp=80:80 --node-port=30080 --dry-run=cl
 
 Both the above commands have their own challenges. While one of it cannot accept a selector the other cannot accept a node port. I would recommend going with the `kubectl expose` command. If you need to specify a node port, generate a definition file using the same command and manually input the nodeport before creating the service.
 
+Create a container and expose them as pod.
+
+```
+kubectl run custom-nginx --image=nginx --port=8080
+```
+
+Create a pod and expose them as service 
+
+This below is handy command to create and expose and (Try out for deployment and etc)
+```
+kubectl run httpd --image=httpd:alpine --port=80 --expose
+```
 
 [Reference:] (https://kubernetes.io/docs/reference/kubectl/conventions/)
 

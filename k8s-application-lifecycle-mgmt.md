@@ -83,9 +83,22 @@ ConfigMap in pods
 
 #### Practice Env 
 
+<b>Command and ars... Manually edit it .. </b>
 
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webapp-green
+  labels:
+      name: webapp-green
+spec:
+  containers:
+  - name: simple-webapp
+    image: kodekloud/webapp-color
+    args: ["--color", "green"] 
 
-
+```
 ### Secrets 
 
 Imperative
@@ -194,3 +207,5 @@ spec:
 ```
 
 busybox image and sleeps for 20 seconds
+
+

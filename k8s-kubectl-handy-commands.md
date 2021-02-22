@@ -40,6 +40,9 @@ kubectl get nodes -o jsonpath='{.items[*].status.addresses[].address} '
 
 kubectl run alpha --image=nginx --command sleep 4800 --env="name=alpha"  --dry-run=client -o yaml > multi-pod.yaml
 
+
+kubectl run  webapp-color  --image=kodekloud/webapp-color --env="APP_COLOR=green" --label=webapp-color --dry-run=client -o yaml > e5.yaml
+
 ```
 
 ```

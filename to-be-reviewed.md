@@ -7,3 +7,6 @@ kubectl create -f kubia-deployment-v1.yaml --record
 
 --record command-line option when creating it. This records the command in the revision history, which will be useful later.
 
+kubectl rollout history deployment kubia
+ while true; do curl http://130.211.109.222; done
+ 

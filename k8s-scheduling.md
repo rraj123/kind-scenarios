@@ -458,4 +458,236 @@ pod name, container name in a pod spec => spend a cycle ??
 
 
 
+### Question Revise
+<br>
 
+#### <u>Scheduling</u> 
+
+If pod is get stuck, it could be due to scheduler is missing . you can manually place a pod on node. 
+
+So, make sure that the control-plane has all the pods up and running. 
+
+
+```
+kubectl explain pod --recursive | grep node
+
+--
+spec:
+  nodeName: node01
+  containers:
+  - image: nginx
+    name: nginx
+--
+```
+
+#### Selectors
+
+
+```
+kubectl get pods --show-labels
+
+kubectl get pods --selector env=dev
+
+kubectl get all --show-labels --selector=env=prod,bu=finance,tier=frontend
+
+```
+
+
+#### Taint and Tolerations
+
+
+```
+Key = spray
+Value = mortein
+Effect = NoSchedule 
+
+kubectl taint nodes node01 spray=mortein:NoSchedule
+```
+Now, set the toleration to the pod 
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+  tolerations:
+  - key: "example-key"
+    operator: "Exists"
+    effect: "NoSchedule
+```
+
+Remove the taint 
+
+
+```
+kubectl taint nodes node1 key1=value1:NoSchedule-
+
+kubectl taint node controlplane node-role.kubernetes.io/master:NoSchedule-
+
+
+```
+
+
+#### Node Affinity
+
+Attach label to the node 
+
+```
+kubectl label node node01 color=blue
+```
+
+create a deployment
+```
+kubectl create deployment blue --image=nginx --replicas=6 --dry-run=client -o yaml  > blud.yaml
+
+```
+
+```
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: blue
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: blue
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        resources: {}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: color
+                operator: In
+                values:
+                - blue
+```
+
+****Tip <b>Another twist for `exists`</b>
+
+```
+  template:
+    metadata:
+      labels:
+        run: nginx
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: Always
+        name: nginx
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/master
+                operator: Exists
+```
+
+#### Resource Limits
+
+Read more on kubernetes.io
+
+#### Daemon Set
+ Read more on Kubernetes.io.
+
+ There is no imperative command for now. Create and copy from site. 
+
+ If you need to schedule it on master node, then pay attention to 
+```
+      tolerations:
+      # this toleration is to have the daemonset runnable on master nodes
+      # remove it if your masters can't run pods
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+```
+ https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/
+
+ #### Static pods
+
+ Kube-proxy and core-dns are not static pods. 
+
+ When you have to create static pod remember to use `--restart=Never` switch.
+
+ ```
+ kubectl run --restart=Never --image=busybox static-busybox --dry-run=client -o yaml --command sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
+
+ kubectl run static-busybox1 --image=busybox  --restart=Never --command -- sleep 1000 --dry-run=client -o yaml
+ ```
+
+ <b><u> The key here is that, the static pod may also live in another node, It is always a good idea to see with `-o wide` option. Thenm you can go to the node and kill it.</u></b>
+
+
+ The static pod always has node name attached to the pod. 
+
+ To get the internal ip of the worker nodes, you can take a look at this command
+
+ ```
+ kubectl get nodes -o wide
+ ```
+ ssh to that node
+
+ The static pod can be spun up from `kubelet process`. So, To find out, 
+ 
+ you should take a look at the kubelet config. 
+ Usually, in the `/var/lib/kubelet/config.yaml`
+ ```
+ps -ef | grep kubelet
+
+ps -ef | grep kubelet | grep config
+ 
+ ```
+
+ Then look for 
+ ```
+ cat /var/lib/kubelet/config.yaml | grep static
+ ```
+
+
+ #### Multiple Schedulers
+
+Follow the kubernetes,
+
+The key thing is that you need to have only these lines are to be included. 
+
+```
+    spec:
+      serviceAccountName: my-scheduler
+      containers:
+      - command:
+        - /usr/local/bin/kube-scheduler
+        - --address=0.0.0.0
+        - --leader-elect=false ## Important.. 
+        - --scheduler-name=my-scheduler ## Important
+        image: gcr.io/my-gcp-project/my-kube-scheduler:1.0
+```
+
+With the Custom scheduler
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: annotation-default-scheduler
+  labels:
+    name: multischeduler-example
+spec:
+  schedulerName: default-scheduler ### Important
+  containers:
+  - name: pod-with-default-annotation-container
+    image: k8s.gcr.io/pause:2.0
+```

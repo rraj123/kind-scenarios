@@ -187,7 +187,39 @@ The diagram may show how you solved , not why?.
 
 In architecture, why is more important than how?. 
 
+How is the detail, 
+
+Why is the underlying details, Architect may have made 4 or 5 decisions, that may not reveal through the diagram.
+
+```
+
+<br>
+
+Architecture needs to capture why?. 
+
+ADRs. (Architecture Decision Records)
+(Blog - Michael Nygard)
+
+Release It. 
+Dev Ops Bible
+
+```
+a collection of records for architecturally significant decisions. Those that affect the structure, nonfunctional characteristics, dependencies, interfaces, or construction techniques. In other words, the why, you might have done some of those things.
+
+Title:
+Status:
+Context:
+Decision:
+Consequences:
+
+You may want to go back and revise and add more or update.  
 
 ```
 
 
+
+
+
+
+
+## Pull 2 - Rebase

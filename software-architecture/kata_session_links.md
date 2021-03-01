@@ -7,3 +7,7 @@ Note : Might be obsolete as they would share github links of semifinalist later
 
 NP: 
 https://github.com/ldynia/archcolider
+
+Recordings to watch. 
+
+https://learning.oreilly.com/videos/distributed-event-driven-services/0636920337805/0636920337805-video327219

@@ -23,7 +23,7 @@ Step 2 & 3 are iterative and feed information to each other.
 ## 3. Usecase  <br>
 Similar to Context diagram, How users will interact with the systems. (Actor / Actions Model)
 
-### Address - Security concerns. 
+
 
 ### DDD Context Map 
 
@@ -43,7 +43,9 @@ To be captured and address the concerns and apply architectural qualities. (DDD 
 
 ### Architecture FIT Functions (Evolutionary) 
 
-
+```
+------------------------------------------------------------------------------------
+```
 ### 4. ADR 
 <i>From Step and 2 and 3, Capture the ADRs. (Format to be decided)</i>
 

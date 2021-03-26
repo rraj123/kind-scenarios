@@ -8,7 +8,7 @@ All the characteristics  <br>
 Software architeture consists of the struture of the system, combined with with an architecture characteristics. 
 <br>
 ```
-Software Architecture = System Structure + Architecture Characteristics
+Software Architecture = Structure of the system + Architecture Characteristics
 * system must support decisions, Design principles 
 
 System Structure = Type of architecture style. 
@@ -44,4 +44,25 @@ Architecture decisions form the constraints of the system and direct the develop
 
 <br>
 
+
+Core Characteristics <br>
+```
+Make architecture decisions
+Continually analyze the architecture
+Keep current with latest trends
+Ensure compliance with decisions
+Diverse exposure and experience
+Have business domain knowledge
+Possess interpersonal skills
+Understand and navigate politics
+```
+
+#### Make Architecture Decisions
+
+`An architect is expected to define the architecture decisions and design principles used to guide technology decisions within the team, the department, or across the enterprise.`
+
+Now, Say it simple word what is architecture decisions 
+what is design principles
+
+<br>
 
